@@ -17,7 +17,7 @@ type YoastHeadJSON = {
   og_url?: string;
   og_site_name?: string;
   og_image?: YoastImage[];
-  twitter_card?: string;
+  twitter_card?: "summary" | "summary_large_image" | "player" | "app" | string;
 };
 
 type FallbackMeta = {
@@ -55,11 +55,25 @@ export function buildMetadataFromYoast(
       siteName: yoast?.og_site_name || fallback.siteName || fallback.title,
       images: ogImage,
     },
-    twitter: {
-      card: yoast?.twitter_card || (ogImage ? "summary_large_image" : "summary"),
-      title,
-      description,
-      images: ogImage?.map((img) => img.url),
-    },
+    twitter: (() => {
+      const allowed: Array<"summary" | "summary_large_image" | "player" | "app"> = [
+        "summary",
+        "summary_large_image",
+        "player",
+        "app",
+      ];
+      const card = allowed.includes(yoast?.twitter_card as any)
+        ? (yoast?.twitter_card as "summary" | "summary_large_image" | "player" | "app")
+        : ogImage
+          ? "summary_large_image"
+          : "summary";
+
+      return {
+        card,
+        title,
+        description,
+        images: ogImage?.map((img) => img.url),
+      };
+    })(),
   };
 }
