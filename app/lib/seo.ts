@@ -62,8 +62,9 @@ export function buildMetadataFromYoast(
         "player",
         "app",
       ];
-      const card = allowed.includes(yoast?.twitter_card as any)
-        ? (yoast?.twitter_card as "summary" | "summary_large_image" | "player" | "app")
+      const cardRaw = yoast?.twitter_card;
+      const card = allowed.includes(cardRaw as (typeof allowed)[number])
+        ? (cardRaw as (typeof allowed)[number])
         : ogImage
           ? "summary_large_image"
           : "summary";

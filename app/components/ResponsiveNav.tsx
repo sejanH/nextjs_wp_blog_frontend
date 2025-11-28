@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type NavLink = {
   label: string;
@@ -16,6 +16,14 @@ type Props = {
 
 export function ResponsiveNav({ links, children }: Props) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleNav = (href: string) => {
+    setLoading(true);
+    setOpen(false);
+    router.push(href);
+  };
 
   return (
     <div className="flex items-center gap-3">
@@ -54,18 +62,23 @@ export function ResponsiveNav({ links, children }: Props) {
               {link.label}
             </a>
           ) : (
-            <Link
+            <button
               key={link.href}
-              href={link.href}
-              className="text-sm font-semibold text-slate-100 transition hover:text-emerald-200"
-              onClick={() => setOpen(false)}
+              type="button"
+              className="text-left text-sm font-semibold text-slate-100 transition hover:text-emerald-200"
+              onClick={() => handleNav(link.href)}
             >
               {link.label}
-            </Link>
+            </button>
           ),
         )}
         {children}
       </div>
+      {loading && (
+        <div className="fixed inset-x-0 top-0 z-30 h-1 bg-emerald-400">
+          <div className="h-full w-full animate-pulse bg-emerald-200" />
+        </div>
+      )}
     </div>
   );
 }

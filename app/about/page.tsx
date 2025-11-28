@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { buildMetadataFromYoast } from "@/app/lib/seo";
 import { WPPost } from "@/app/types/wp";
-import { ResponsiveNav } from "@/app/components/ResponsiveNav";
 import { Navbar } from "@/app/components/Navbar";
 
 export const revalidate = 300;

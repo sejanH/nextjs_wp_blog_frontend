@@ -7,7 +7,7 @@ export type WPPost = {
   excerpt: { rendered: string };
   content?: { rendered: string };
   yoast_head?: string;
-  yoast_head_json?: any;
+  yoast_head_json?: unknown;
   _embedded?: {
     "wp:featuredmedia"?: Array<{ source_url?: string; alt_text?: string }>;
     "wp:term"?: Array<Array<{ name?: string; slug?: string }>>;

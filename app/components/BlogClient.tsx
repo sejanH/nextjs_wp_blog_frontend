@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navbar } from "./Navbar";
 import { WPPost } from "../types/wp";
 
@@ -85,46 +85,45 @@ export function BlogClient({
 
   const hasMore = useMemo(() => page < totalPages, [page, totalPages]);
 
-  const fetchPage = async (
-    pageToFetch: number,
-    searchTerm: string,
-    replace = false,
-  ) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const url = new URL(`${apiBase}/posts`);
-      url.searchParams.set("_embed", "");
-      url.searchParams.set("per_page", "6");
-      url.searchParams.set("page", String(pageToFetch));
-      if (categoryId) {
-        url.searchParams.set("categories", String(categoryId));
-      }
-      if (searchTerm) {
-        url.searchParams.set("search", searchTerm);
-      }
+  const fetchPage = useCallback(
+    async (pageToFetch: number, searchTerm: string, replace = false) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const url = new URL(`${apiBase}/posts`);
+        url.searchParams.set("_embed", "");
+        url.searchParams.set("per_page", "6");
+        url.searchParams.set("page", String(pageToFetch));
+        if (categoryId) {
+          url.searchParams.set("categories", String(categoryId));
+        }
+        if (searchTerm) {
+          url.searchParams.set("search", searchTerm);
+        }
 
-      const res = await fetch(url.toString());
-      if (!res.ok) {
-        throw new Error("Unable to reach WordPress. Check the API URL.");
+        const res = await fetch(url.toString());
+        if (!res.ok) {
+          throw new Error("Unable to reach WordPress. Check the API URL.");
+        }
+
+        const nextPosts: WPPost[] = await res.json();
+        const nextTotal = Number(res.headers.get("X-WP-TotalPages") ?? "1");
+
+        setTotalPages(nextTotal);
+        setPage(pageToFetch);
+        setPosts((prev) => (replace ? nextPosts : [...prev, ...nextPosts]));
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Something went wrong while loading posts.",
+        );
+      } finally {
+        setLoading(false);
       }
-
-      const nextPosts: WPPost[] = await res.json();
-      const nextTotal = Number(res.headers.get("X-WP-TotalPages") ?? "1");
-
-      setTotalPages(nextTotal);
-      setPage(pageToFetch);
-      setPosts((prev) => (replace ? nextPosts : [...prev, ...nextPosts]));
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong while loading posts.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [apiBase, categoryId],
+  );
 
   const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -147,7 +146,7 @@ export function BlogClient({
     }
 
     return () => observer.disconnect();
-  }, [hasMore, loading, page, query]);
+  }, [fetchPage, hasMore, loading, page, query]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-950 to-slate-950 text-slate-50">

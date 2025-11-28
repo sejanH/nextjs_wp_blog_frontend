@@ -1,15 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Navbar } from "@/app/components/Navbar";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/$/, "") || "";
-  
-const FORM_ID = process.env.NEXT_PUBLIC_WPFORM_ID || "";
-const AUTH_USER = process.env.WORDPRESS_BASIC_AUTH_USER || "";
-const AUTH_PASS = process.env.WORDPRESS_BASIC_AUTH_PASSWORD || "";
 
 type FormState = {
   name: string;
