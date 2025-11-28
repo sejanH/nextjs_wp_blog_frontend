@@ -68,6 +68,28 @@ function getCategoryHref(category: { slug?: string; name?: string }) {
   return `/category/${slug}`;
 }
 
+// Loading skeleton component
+function PostSkeleton() {
+  return (
+    <div className="group mb-6 break-inside-avoid overflow-hidden rounded-2xl border border-emerald-200/50 bg-white text-slate-900 shadow-sm">
+      <div className="relative h-44 w-full overflow-hidden bg-slate-200 animate-pulse" />
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        <div className="h-6 bg-slate-200 rounded animate-pulse" />
+        <div className="flex gap-2">
+          <div className="h-4 w-20 bg-slate-200 rounded animate-pulse" />
+          <div className="h-4 w-16 bg-slate-200 rounded animate-pulse" />
+        </div>
+        <div className="space-y-2">
+          <div className="h-3 bg-slate-200 rounded animate-pulse" />
+          <div className="h-3 bg-slate-200 rounded animate-pulse" />
+          <div className="h-3 w-3/4 bg-slate-200 rounded animate-pulse" />
+        </div>
+        <div className="h-4 w-24 bg-emerald-200 rounded animate-pulse mt-2" />
+      </div>
+    </div>
+  );
+}
+
 export function BlogClient({
   initialPosts,
   initialTotalPages,
@@ -293,7 +315,14 @@ export function BlogClient({
         </section>
 
         <div ref={loadMoreRef} className="h-10" aria-hidden />
-        {loading && (
+        {loading && posts.length > 0 && (
+          <div className="columns-1 gap-6 sm:columns-2 xl:columns-3">
+            <PostSkeleton />
+            <PostSkeleton />
+            <PostSkeleton />
+          </div>
+        )}
+        {loading && posts.length === 0 && (
           <p className="text-center text-sm text-slate-200/80">Loading…</p>
         )}
       </main>
