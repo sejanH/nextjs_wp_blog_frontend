@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Navbar } from "./Navbar";
 import { WPPost } from "../types/wp";
 
 type Props = {
@@ -150,55 +151,34 @@ export function BlogClient({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-950 to-slate-950 text-slate-50">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-slate-950/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4 sm:px-10">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="flex items-center gap-3 rounded-2xl px-2 py-1 transition hover:text-emerald-200"
+      <Navbar
+        links={[
+          { label: "Home", href: "/" },
+          { label: "About", href: "/about" },
+          { label: "Contact", href: "/contact" },
+        ]}
+        rightSlot={
+          <form
+            onSubmit={handleSearch}
+            className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5"
+          >
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search posts"
+              className="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-400 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="rounded-full bg-emerald-300 px-3 py-1 text-xs font-semibold text-slate-900 transition hover:bg-emerald-200"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-lg font-semibold text-slate-900 shadow-lg shadow-emerald-900/40">
-                sz
-              </div>
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-200">
-                  Sejan.xyz
-                </p>
-              </div>
-            </Link>
-          </div>
-          <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-100 sm:gap-6">
-            <Link className="transition hover:text-emerald-200" href="/">
-              Home
-            </Link>
-            <Link className="transition hover:text-emerald-200" href="/about">
-              About
-            </Link>
-            <Link className="transition hover:text-emerald-200" href="/contact">
-              Contact
-            </Link>
-            <form
-              onSubmit={handleSearch}
-              className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5"
-            >
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search posts"
-                className="w-32 bg-transparent text-sm text-slate-100 placeholder:text-slate-400 focus:outline-none md:w-44"
-              />
-              <button
-                type="submit"
-                className="rounded-full bg-emerald-300 px-3 py-1 text-xs font-semibold text-slate-900 transition hover:bg-emerald-200"
-              >
-                Go
-              </button>
-            </form>
-          </nav>
-        </div>
-      </header>
+              Go
+            </button>
+          </form>
+        }
+      />
 
-      <main className="mx-auto flex max-w-6xl flex-col gap-12 px-6 pb-16 pt-12 sm:px-10">
+      <main className="mx-auto flex max-w-6xl flex-col gap-12 px-6 pb-8 pt-6 sm:px-10">
         <section className="columns-1 gap-6 sm:columns-2 xl:columns-3">
           {error && (
             <div className="rounded-2xl border border-red-400/40 bg-red-500/10 p-6 text-red-50">
