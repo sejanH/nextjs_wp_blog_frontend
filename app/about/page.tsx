@@ -4,8 +4,7 @@ import type { Metadata } from "next";
 import { buildMetadataFromYoast } from "@/app/lib/seo";
 import { WPPost } from "@/app/types/wp";
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 const API_BASE = process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/$/, "");
 const SITE_BASE =
@@ -60,7 +59,7 @@ async function getAboutPage(): Promise<WPPost> {
   }
 
   const res = await fetch(`${API_BASE}/pages?slug=about&_embed`, {
-    cache: "no-store",
+    next: { revalidate },
   });
 
   if (!res.ok) {
@@ -132,7 +131,7 @@ export default async function AboutPage() {
               </div>
             </Link>
           </div>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-100 sm:flex">
+          <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-100 sm:gap-6">
             <Link className="transition hover:text-emerald-200" href="/">
               Home
             </Link>

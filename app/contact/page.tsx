@@ -114,7 +114,7 @@ export default function ContactPage() {
               </div>
             </Link>
           </div>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-100 sm:flex">
+          <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-100 sm:gap-6">
             <Link className="transition hover:text-emerald-200" href="/">
               Home
             </Link>

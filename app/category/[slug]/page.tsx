@@ -4,8 +4,7 @@ import { BlogClient } from "@/app/components/BlogClient";
 import { buildMetadataFromYoast } from "@/app/lib/seo";
 import { WPPost, WPCategory } from "@/app/types/wp";
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 const API_BASE = process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/$/, "");
 const SITE_BASE =
@@ -66,7 +65,7 @@ export default async function CategoryPage({
   const categoryRes = await fetch(
     `${API_BASE}/categories?slug=${slug}&_embed`,
     {
-      cache: "no-store",
+      next: { revalidate },
     },
   );
 
@@ -84,7 +83,7 @@ export default async function CategoryPage({
   const postsRes = await fetch(
     `${API_BASE}/posts?_embed&per_page=6&categories=${category.id}`,
     {
-      cache: "no-store",
+      next: { revalidate },
     },
   );
 

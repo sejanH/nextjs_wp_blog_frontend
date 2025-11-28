@@ -3,8 +3,7 @@ import { buildMetadataFromYoast } from "./lib/seo";
 import { BlogClient } from "./components/BlogClient";
 import { WPPost } from "./types/wp";
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 const API_BASE = process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/$/, "");
 const SITE_BASE =
@@ -50,7 +49,7 @@ export default async function Home() {
   }
 
   const response = await fetch(`${API_BASE}/posts?_embed&per_page=6`, {
-    cache: "no-store",
+    next: { revalidate },
   });
 
   if (!response.ok) {

@@ -6,8 +6,7 @@ import type { Metadata } from "next";
 import { buildMetadataFromYoast } from "@/app/lib/seo";
 import { JSX } from "react/jsx-runtime";
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 const API_BASE = process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/$/, "");
 const SITE_BASE =
@@ -100,7 +99,7 @@ async function getPostBySlug(slug: string): Promise<WPPost> {
   }
 
   const res = await fetch(`${API_BASE}/posts?slug=${slug}&_embed`, {
-    cache: "no-store",
+    next: { revalidate },
   });
 
   if (!res.ok) {
@@ -117,7 +116,7 @@ async function getPostBySlug(slug: string): Promise<WPPost> {
 
 async function fetchFullContent(link: string): Promise<string | null> {
   try {
-    const res = await fetch(link, { cache: "no-store" });
+    const res = await fetch(link, { next: { revalidate } });
     if (!res.ok) return null;
     const html = await res.text();
     const match = html.match(
@@ -137,7 +136,7 @@ async function getComments(postId: number): Promise<WPComment[]> {
   try {
     const res = await fetch(
       `${API_BASE}/comments?post=${postId}&per_page=100&_embed`,
-      { cache: "no-store" },
+      { next: { revalidate } },
     );
     if (!res.ok) return [];
     return res.json();
@@ -264,7 +263,7 @@ export default async function PostPage({
               </div>
             </Link>
           </div>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-100 sm:flex">
+          <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-100 sm:gap-6">
             <Link className="transition hover:text-emerald-200" href="/">
               Home
             </Link>
