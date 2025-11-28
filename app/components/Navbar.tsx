@@ -23,7 +23,7 @@ export function Navbar({ links, rightSlot }: NavbarProps) {
           href="/"
           className="flex items-center gap-3 rounded-2xl px-2 py-1 transition hover:text-emerald-200"
         >
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-lg font-semibold text-slate-900 shadow-lg shadow-emerald-900/40">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-400 to-emerald-600 text-lg font-semibold text-slate-900 shadow-lg shadow-emerald-900/40">
             sz
           </div>
           <div>

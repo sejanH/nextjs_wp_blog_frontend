@@ -114,7 +114,7 @@ export default async function AboutPage() {
   const page = await getAboutPage();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-950 to-slate-950 text-slate-50">
+    <div className="min-h-screen bg-linear-to-br from-emerald-950 via-slate-950 to-slate-950 text-slate-50">
       <Navbar
         links={[
           { label: "Home", href: "/" },
