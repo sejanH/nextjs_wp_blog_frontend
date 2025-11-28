@@ -150,6 +150,11 @@ export function BlogClient({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-950 to-slate-950 text-slate-50">
+      {loading && (
+        <div className="fixed inset-x-0 top-0 z-30 h-1 bg-emerald-400">
+          <div className="h-full w-full animate-pulse bg-emerald-200" />
+        </div>
+      )}
       <Navbar
         links={[
           { label: "Home", href: "/" },
