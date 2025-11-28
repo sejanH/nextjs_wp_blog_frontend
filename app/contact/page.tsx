@@ -39,41 +39,19 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!API_BASE || !FORM_ID) {
-      setStatus({
-        ok: false,
-        message:
-          "Contact API is not configured. Add NEXT_PUBLIC_WORDPRESS_API_URL and NEXT_PUBLIC_WPFORM_ID in .env.",
-      });
-      return;
-    }
-
     setSubmitting(true);
     setStatus({ ok: true, message: null });
     try {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (AUTH_USER && AUTH_PASS) {
-        headers.Authorization = `Basic ${btoa(`${AUTH_USER}:${AUTH_PASS}`)}`;
-      }
-
-      const res = await fetch(
-        `${API_BASE}/wpforms/v1/forms/${FORM_ID}/entries`,
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            // WPForms expects numeric field IDs; adjust to your form mapping.
-            fields: {
-              1: form.name,
-              2: form.email,
-              3: form.subject,
-              4: form.message,
-            },
-          }),
-        },
-      );
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          subject: form.subject,
+          message: form.message,
+        }),
+      });
 
       if (!res.ok) {
         const errorText = await res.text();
