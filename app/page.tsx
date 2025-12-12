@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { buildMetadataFromYoast } from "./lib/seo";
+import { buildMetadataFromYoast, generateBlogJsonLd } from "./lib/seo";
 import { BlogClient } from "./components/BlogClient";
 import { WPPost } from "./types/wp";
 
@@ -59,12 +59,21 @@ export default async function Home() {
   const posts: WPPost[] = await response.json();
   const totalPages = Number(response.headers.get("X-WP-TotalPages") ?? "1");
 
+  // Generate structured data for SEO
+  const jsonLd = generateBlogJsonLd(SITE_BASE);
+
   return (
-    <BlogClient
-      initialPosts={posts}
-      initialTotalPages={totalPages}
-      apiBase={API_BASE}
-      siteBase={SITE_BASE}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd}
+      />
+      <BlogClient
+        initialPosts={posts}
+        initialTotalPages={totalPages}
+        apiBase={API_BASE}
+        siteBase={SITE_BASE}
+      />
+    </>
   );
 }

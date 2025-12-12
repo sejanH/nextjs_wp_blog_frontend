@@ -4,7 +4,7 @@ import { WPComment, WPPost } from "@/app/types/wp";
 import { CommentForm } from "@/app/components/CommentForm";
 import type { Metadata } from "next";
 import { buildMetadataFromYoast, generateArticleJsonLd, generateBreadcrumbJsonLd } from "@/app/lib/seo";
-import { JSX, Fragment } from "react/jsx-runtime";
+import { JSX } from "react/jsx-runtime";
 import { Navbar } from "@/app/components/Navbar";
 
 export const revalidate = 300;
@@ -39,7 +39,7 @@ function decodeEntities(text: string | undefined) {
           : parseInt(entity.slice(1), 10);
       return String.fromCodePoint(codePoint);
     }
-    return map[entity] ?? "&" + entity + ";";
+    return map[entity] ?? `&${entity};`;
   });
 }
 
@@ -88,9 +88,9 @@ function buildShareLinks(url: string, title: string) {
   const encodedTitle = encodeURIComponent(title);
 
   return {
-    twitter: "https://twitter.com/intent/tweet?url=" + encodedUrl + "&text=" + encodedTitle,
-    facebook: "https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl,
-    linkedin: "https://www.linkedin.com/sharing/share-offsite/?url=" + encodedUrl,
+    twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
   };
 }
 
@@ -99,7 +99,7 @@ async function getPostBySlug(slug: string): Promise<WPPost> {
     throw new Error("Set NEXT_PUBLIC_WORDPRESS_API_URL in .env");
   }
 
-  const res = await fetch(API_BASE + "/posts?slug=" + slug + "&_embed", {
+  const res = await fetch(`${API_BASE}/posts?slug=${slug}&_embed`, {
     next: { revalidate },
   });
 
@@ -136,7 +136,7 @@ async function getComments(postId: number): Promise<WPComment[]> {
   if (!API_BASE) return [];
   try {
     const res = await fetch(
-      API_BASE + "/comments?post=" + postId + "&per_page=100&_embed",
+      `${API_BASE}/comments?post=${postId}&per_page=100&_embed`,
       { next: { revalidate } },
     );
     if (!res.ok) return [];
@@ -154,7 +154,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const fallback = {
     title: "Post",
-    url: SITE_BASE ? SITE_BASE + "/posts/" + slug : undefined,
+    url: SITE_BASE ? `${SITE_BASE}/posts/${slug}` : undefined,
     siteName: "Sejan · Blog",
   };
 
@@ -162,7 +162,7 @@ export async function generateMetadata({
 
   try {
     const res = await fetch(
-      API_BASE + "/posts?slug=" + slug + "&_fields=yoast_head_json,title,excerpt",
+      `${API_BASE}/posts?slug=${slug}&_fields=yoast_head_json,title,excerpt`,
       { cache: "no-store" },
     );
     if (res.ok) {
@@ -211,7 +211,7 @@ export default async function PostPage({
   const primaryCategory = categories[0];
   const primaryCategorySlug = slugifyCategory(primaryCategory);
   const share = buildShareLinks(
-    post.link || (SITE_BASE || "") + "/posts/" + slug,
+    post.link || `${SITE_BASE || ""}/posts/${slug}`,
     decodeEntities(stripHtml(post.title.rendered)),
   );
   const comments = await getComments(post.id);
@@ -253,21 +253,21 @@ export default async function PostPage({
   const jsonLd = generateArticleJsonLd({
     title: decodeEntities(stripHtml(post.title.rendered)),
     description: decodeEntities(stripHtml(post.excerpt?.rendered || "")),
-    url: post.link || (SITE_BASE || "") + "/posts/" + slug,
+    url: post.link || `${SITE_BASE || ""}/posts/${slug}`,
     imageUrl: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url,
-    author: (post.yoast_head_json as any)?.author,
-    publishedTime: (post.yoast_head_json as any)?.published_time,
-    modifiedTime: (post.yoast_head_json as any)?.modified_time,
+    author: post.yoast_head_json?.author,
+    publishedTime: post.yoast_head_json?.published_time,
+    modifiedTime: post.yoast_head_json?.modified_time,
   });
 
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: "Home", url: SITE_BASE || "" },
-    { name: "Blog", url: (SITE_BASE || "") + "/" },
-    { name: decodeEntities(stripHtml(post.title.rendered)), url: post.link || (SITE_BASE || "") + "/posts/" + slug },
+    { name: "Blog", url: `${SITE_BASE || ""}/` },
+    { name: decodeEntities(stripHtml(post.title.rendered)), url: post.link || `${SITE_BASE || ""}/posts/${slug}` },
   ]);
 
   return (
-    <Fragment>
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLd}
@@ -313,7 +313,7 @@ export default async function PostPage({
               {primaryCategory && (
                 <>
                   <Link
-                    href={"/category/" + primaryCategorySlug}
+                    href={`/category/${primaryCategorySlug}`}
                     className="font-semibold transition hover:text-emerald-100"
                   >
                     {decodeEntities(primaryCategory.name)}
@@ -336,7 +336,7 @@ export default async function PostPage({
                 (category, index) =>
                   category?.name && (
                     <span
-                      key={post.id + "-" + index + "-" + category.name}
+                      key={`${post.id}-${index}-${category.name}`}
                       className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-100"
                     >
                       {decodeEntities(category.name)}
@@ -415,6 +415,5 @@ export default async function PostPage({
         </section>
       </main>
     </div>
-    </Fragment>
   );
 }

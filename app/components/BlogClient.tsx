@@ -18,13 +18,6 @@ function stripHtml(html: string) {
   return html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
-function getImage(post: WPPost) {
-  const image = post._embedded?.["wp:featuredmedia"]?.[0];
-  return image?.source_url
-    ? { src: image.source_url, alt: image.alt_text || post.title.rendered }
-    : null;
-}
-
 function decodeEntities(text: string) {
   const map: Record<string, string> = {
     amp: "&",
@@ -34,7 +27,7 @@ function decodeEntities(text: string) {
     apos: "'",
     nbsp: " ",
   };
-
+  
   return text.replace(/&(#\d+|#x[0-9a-fA-F]+|\w+);/g, (_, entity) => {
     if (entity[0] === "#") {
       const codePoint =
@@ -43,12 +36,15 @@ function decodeEntities(text: string) {
           : parseInt(entity.slice(1), 10);
       return String.fromCodePoint(codePoint);
     }
-    return map[entity] ?? `&${entity};`;
+    return map[entity] ?? "&" + entity + ";";
   });
 }
 
-function plainText(html: string) {
-  return decodeEntities(stripHtml(html));
+function getImage(post: WPPost) {
+  const image = post._embedded?.["wp:featuredmedia"]?.[0];
+  return image
+    ? { src: image.source_url, alt: image.alt_text || post.title.rendered }
+    : null;
 }
 
 function getCommentCount(post: WPPost) {
@@ -71,20 +67,20 @@ function getCategoryHref(category: { slug?: string; name?: string }) {
 // Loading skeleton component
 function PostSkeleton() {
   return (
-    <div className="group mb-6 break-inside-avoid overflow-hidden rounded-2xl border border-emerald-200/50 bg-white text-slate-900 shadow-sm">
-      <div className="relative h-44 w-full overflow-hidden bg-slate-200 animate-pulse" />
+    <div className="group overflow-hidden rounded-2xl border border-emerald-200/50 bg-white text-slate-900 shadow-sm animate-fade-in">
+      <div className="relative h-44 w-full overflow-hidden skeleton" />
       <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="h-6 bg-slate-200 rounded animate-pulse" />
+        <div className="h-6 skeleton rounded" />
         <div className="flex gap-2">
-          <div className="h-4 w-20 bg-slate-200 rounded animate-pulse" />
-          <div className="h-4 w-16 bg-slate-200 rounded animate-pulse" />
+          <div className="h-4 w-20 skeleton rounded" />
+          <div className="h-4 w-16 skeleton rounded" />
         </div>
         <div className="space-y-2">
-          <div className="h-3 bg-slate-200 rounded animate-pulse" />
-          <div className="h-3 bg-slate-200 rounded animate-pulse" />
-          <div className="h-3 w-3/4 bg-slate-200 rounded animate-pulse" />
+          <div className="h-3 skeleton rounded" />
+          <div className="h-3 skeleton rounded" />
+          <div className="h-3 w-3/4 skeleton rounded" />
         </div>
-        <div className="h-4 w-24 bg-emerald-200 rounded animate-pulse mt-2" />
+        <div className="h-4 w-24 skeleton rounded mt-2" />
       </div>
     </div>
   );
@@ -160,7 +156,7 @@ export function BlogClient({
           fetchPage(page + 1, query);
         }
       },
-      { rootMargin: "300px 0px 300px 0px" },
+      { rootMargin: "300px 0px" },
     );
 
     if (loadMoreRef.current) {
@@ -173,7 +169,7 @@ export function BlogClient({
   return (
     <div className="min-h-screen bg-linear-to-br from-emerald-950 via-slate-950 to-slate-950 text-slate-50">
       {loading && (
-        <div className="fixed inset-x-0 top-0 z-30 h-1 bg-emerald-400">
+        <div className="fixed inset-x-0 top-0 z-30 h-1 bg-emerald-400" role="progressbar" aria-label="Loading">
           <div className="h-full w-full animate-pulse bg-emerald-200" />
         </div>
       )}
@@ -186,17 +182,23 @@ export function BlogClient({
         rightSlot={
           <form
             onSubmit={handleSearch}
-            className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5"
+            className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 backdrop-blur-sm transition-all duration-300 focus-within:border-emerald-300/50 focus-within:bg-white/10"
+            role="search"
           >
+            <label htmlFor="search-input" className="sr-only">Search posts</label>
             <input
+              id="search-input"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search posts"
-              className="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-400 focus:outline-none"
+              className="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-400 focus:outline-none transition-all duration-300"
+              autoComplete="off"
+              spellCheck="false"
             />
             <button
               type="submit"
-              className="rounded-full bg-emerald-300 px-3 py-1 text-xs font-semibold text-slate-900 transition hover:bg-emerald-200"
+              className="rounded-full bg-emerald-300 px-3 py-1 text-xs font-semibold text-slate-900 transition-all duration-300 hover:bg-emerald-200 hover:scale-105 focus-ring"
+              aria-label="Search"
             >
               Go
             </button>
@@ -204,10 +206,10 @@ export function BlogClient({
         }
       />
 
-      <main className="mx-auto flex max-w-6xl flex-col gap-12 px-6 pb-8 pt-6 sm:px-10">
-        <section className="columns-1 gap-6 sm:columns-2 xl:columns-3">
+      <main id="main-content" className="container-responsive flex flex-col gap-12 pb-8 pt-6 animate-fade-in">
+        <section className="masonry-grid" aria-label="Blog posts">
           {error && (
-            <div className="rounded-2xl border border-red-400/40 bg-red-500/10 p-6 text-red-50">
+            <div className="rounded-2xl border border-red-400/40 bg-red-500/10 p-6 text-red-50 animate-slide-up" role="alert">
               <p className="text-base font-semibold">Connection issue</p>
               <p className="mt-2 text-sm opacity-90">{error}</p>
               <p className="mt-3 text-xs opacity-70">
@@ -218,7 +220,7 @@ export function BlogClient({
           )}
 
           {!error && posts.length === 0 && (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-slate-100">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-slate-100 animate-slide-up">
               <p className="text-base font-semibold">No posts yet</p>
               <p className="mt-2 text-sm opacity-80">
                 Publish your first article in WordPress — it will appear here as
@@ -228,7 +230,7 @@ export function BlogClient({
           )}
 
           {!error &&
-            posts.map((post) => {
+            posts.map((post, index) => {
               const image = getImage(post);
               const categories = post._embedded?.["wp:term"]?.[0] || [];
               const comments = getCommentCount(post);
@@ -236,57 +238,60 @@ export function BlogClient({
               return (
                 <article
                   key={post.id}
-                  className="group mb-6 break-inside-avoid overflow-hidden rounded-2xl border border-emerald-200/50 bg-white text-slate-900 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                  className="group overflow-hidden rounded-2xl border border-emerald-200/50 bg-white text-slate-900 shadow-sm hover-lift stagger-item"
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+                  <div className="relative h-44 w-full overflow-hidden bg-slate-100 image-hover">
                     {image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={image.src}
                         alt={stripHtml(image.alt)}
+                        width={400}
+                        height={176}
                         className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-sm uppercase tracking-[0.2em] text-emerald-600">
+                      <div className="flex h-full w-full items-center justify-center text-sm uppercase tracking-[0.2em] text-emerald-600" aria-hidden="true">
                         WordPress Post
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-1 flex-col gap-3 p-5">
-                    <Link href={`/posts/${post.slug}`}>
-                      <h2 className="text-xl font-semibold leading-snug text-emerald-700 transition group-hover:text-emerald-600">
-                        {plainText(post.title.rendered)}
+                  <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
+                    <Link href={`/posts/${post.slug}`} className="focus-ring rounded">
+                      <h2 className="text-responsive-lg font-semibold leading-snug text-emerald-700 transition-colors duration-300 group-hover:text-emerald-600">
+                        {stripHtml(post.title.rendered)}
                       </h2>
                     </Link>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-emerald-700">
+                    <div className="flex flex-wrap items-center gap-3 text-responsive-sm text-emerald-700">
                       {categories[0]?.name && (
                         <Link
-                          className="inline-flex items-center gap-2 hover:text-emerald-800"
+                          className="inline-flex items-center gap-2 transition-colors duration-300 hover:text-emerald-800 touch-target focus-ring rounded"
                           href={getCategoryHref(categories[0])}
+                          aria-label={`View posts in ${decodeEntities(categories[0].name)} category`}
                         >
                           <svg
                             aria-hidden="true"
                             viewBox="0 0 24 24"
-                            className="h-4 w-4"
+                            className="h-4 w-4 transition-transform duration-300 group-hover:scale-110"
                             fill="none"
                             stroke="currentColor"
-                          strokeWidth={2}
+                            strokeWidth={2}
                           >
                             <path d="M6 4h9l3 3v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
                             <path d="M14 2v4" />
                             <path d="M9 2v4" />
                           </svg>
-                          <span className="font-medium underline underline-offset-4">
+                          <span className="font-medium underline underline-offset-4 decoration-2 decoration-transparent transition-colors duration-300 group-hover:decoration-emerald-600">
                             {decodeEntities(categories[0].name)}
                           </span>
                         </Link>
                       )}
-                      <span className="hidden text-emerald-600 sm:inline">•</span>
+                      <span className="hidden text-emerald-600 sm:inline" aria-hidden="true">•</span>
                       <span className="inline-flex items-center gap-1 text-emerald-700">
                         <svg
                           aria-hidden="true"
                           viewBox="0 0 24 24"
-                          className="h-4 w-4"
+                          className="h-4 w-4 transition-transform duration-300 group-hover:scale-110"
                           fill="none"
                           stroke="currentColor"
                           strokeWidth={2}
@@ -296,16 +301,17 @@ export function BlogClient({
                         {comments !== undefined ? `${comments} Comments` : "Comments"}
                       </span>
                     </div>
-                    <p className="line-clamp-3 text-sm leading-relaxed text-slate-700">
-                      {plainText(post.excerpt.rendered)}
+                    <p className="line-clamp-3 text-responsive-sm leading-relaxed text-slate-700">
+                      {stripHtml(post.excerpt.rendered)}
                     </p>
                     <div className="mt-auto pt-2">
                       <Link
                         href={`/posts/${post.slug}`}
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 underline underline-offset-4 transition hover:text-emerald-800"
+                        className="inline-flex items-center gap-1 text-responsive-sm font-semibold text-emerald-700 underline underline-offset-4 decoration-2 decoration-transparent transition-all duration-300 group-hover:text-emerald-800 group-hover:decoration-emerald-600 group-hover:translate-x-1 touch-target focus-ring rounded"
+                        aria-label={`Read more about ${stripHtml(post.title.rendered)}`}
                       >
                         Continue Reading
-                        <span aria-hidden>→</span>
+                        <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                       </Link>
                     </div>
                   </div>
@@ -313,17 +319,21 @@ export function BlogClient({
               );
             })}
         </section>
-
         <div ref={loadMoreRef} className="h-10" aria-hidden />
         {loading && posts.length > 0 && (
-          <div className="columns-1 gap-6 sm:columns-2 xl:columns-3">
+          <div className="grid-responsive">
             <PostSkeleton />
             <PostSkeleton />
             <PostSkeleton />
           </div>
         )}
         {loading && posts.length === 0 && (
-          <p className="text-center text-sm text-slate-200/80">Loading…</p>
+          <div className="flex justify-center py-12" aria-live="polite">
+            <div className="flex items-center gap-2 text-sm text-slate-200/80">
+              <div className="h-4 w-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" aria-hidden="true"></div>
+              <span>Loading posts…</span>
+            </div>
+          </div>
         )}
       </main>
     </div>
