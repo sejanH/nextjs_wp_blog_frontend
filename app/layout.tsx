@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
-import { reportWebVitals } from "./lib/performance";
 
 const sans = Manrope({
   variable: "--font-body",

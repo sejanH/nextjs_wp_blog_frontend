@@ -1,5 +1,14 @@
 // Performance monitoring utilities
-export const reportWebVitals = (metric: any) => {
+
+interface WebVitalMetric {
+  name: string;
+  value: number;
+  id: string;
+  delta: number;
+  entries: PerformanceEntry[];
+}
+
+export const reportWebVitals = (metric: WebVitalMetric) => {
   // In production, you would send these metrics to an analytics service
   if (process.env.NODE_ENV === 'production') {
     // Example: Send to analytics
@@ -24,7 +33,7 @@ export const createIntersectionObserver = (
 };
 
 // Debounce function for search input
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {
@@ -36,18 +45,18 @@ export const debounce = <T extends (...args: any[]) => any>(
 };
 
 // Cache API responses
-export class APICache {
-  private cache = new Map<string, { data: any; timestamp: number }>();
+export class APICache<T = unknown> {
+  private cache = new Map<string, { data: T; timestamp: number }>();
   private maxAge = 5 * 60 * 1000; // 5 minutes
 
-  set(key: string, data: any) {
+  set(key: string, data: T): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
     });
   }
 
-  get(key: string) {
+  get(key: string): T | null {
     const item = this.cache.get(key);
     if (!item) return null;
 
@@ -59,7 +68,7 @@ export class APICache {
     return item.data;
   }
 
-  clear() {
+  clear(): void {
     this.cache.clear();
   }
 }

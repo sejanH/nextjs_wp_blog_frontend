@@ -255,9 +255,9 @@ export default async function PostPage({
     description: decodeEntities(stripHtml(post.excerpt?.rendered || "")),
     url: post.link || (SITE_BASE || "") + "/posts/" + slug,
     imageUrl: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url,
-    author: (post.yoast_head_json as any)?.author,
-    publishedTime: (post.yoast_head_json as any)?.published_time,
-    modifiedTime: (post.yoast_head_json as any)?.modified_time,
+    author: (post.yoast_head_json as { author?: string })?.author,
+    publishedTime: (post.yoast_head_json as { published_time?: string })?.published_time,
+    modifiedTime: (post.yoast_head_json as { modified_time?: string })?.modified_time,
   });
 
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([

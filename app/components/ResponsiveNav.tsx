@@ -23,7 +23,7 @@ export function ResponsiveNav({ links, children }: Props) {
       <button
         type="button"
         aria-label="Toggle navigation"
-        className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-slate-100 transition-all duration-300 hover:border-emerald-300 hover:text-emerald-200 hover:bg-white/10 focus-ring sm:hidden"
+        className="relative flex h-10 w-10 items-center justify-center rounded-xl glass border border-white/10 text-slate-100 transition-all duration-300 hover:border-emerald-400/50 hover:text-emerald-200 hover:bg-white/10 hover:scale-105 focus-ring md:hidden"
         onClick={() => setOpen((v) => !v)}
       >
         <span className={`absolute h-0.5 w-5 bg-current transition-all duration-300 ${open ? "translate-y-0 rotate-45" : "-translate-y-1.5"}`}></span>
@@ -31,44 +31,42 @@ export function ResponsiveNav({ links, children }: Props) {
         <span className={`absolute h-0.5 w-5 bg-current transition-all duration-300 ${open ? "translate-y-0 -rotate-45" : "translate-y-1.5"}`}></span>
       </button>
 
-      <div
-        className={`${
-          open ? "flex animate-slide-down" : "hidden"
-        } absolute left-0 right-0 top-full z-10 flex-col gap-3 border-b border-white/10 bg-slate-900/95 backdrop-blur-md px-6 py-4 sm:static sm:z-auto sm:flex sm:flex-row sm:items-center sm:gap-6 sm:border-none sm:bg-transparent sm:p-0`}
-      >
-        {links.map((link, index) =>
-          link.external ? (
-            <a
-              key={link.href}
-              href={link.href}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm font-semibold text-slate-100 transition-all duration-300 hover:text-emerald-200 hover:-translate-y-0.5 focus-ring"
-              style={{ animationDelay: `${index * 0.05}s` }}
-              onClick={() => setOpen(false)}
-            >
-              {link.label}
-            </a>
-          ) : (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-semibold text-slate-100 transition-all duration-300 hover:text-emerald-200 hover:-translate-y-0.5 focus-ring"
-              style={{ animationDelay: `${index * 0.05}s` }}
-              onClick={() => {
-                setLoading(true);
-                setOpen(false);
-              }}
-            >
-              {link.label}
-            </Link>
-          ),
-        )}
-        {children}
-      </div>
+      {/* Mobile menu overlay */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-md md:hidden"
+          onClick={() => setOpen(false)}
+        >
+          <nav
+            className="flex flex-col gap-4 p-6 pt-20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {links.map((link, index) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-xl font-semibold text-white transition-all duration-300 hover:text-emerald-300 hover:translate-x-2 focus-ring rounded-lg p-2"
+                style={{ animationDelay: `${index * 0.1}s` }}
+                onClick={() => {
+                  setLoading(true);
+                  setOpen(false);
+                }}
+              >
+                {link.label}
+              </Link>
+            ))}
+            {children && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                {children}
+              </div>
+            )}
+          </nav>
+        </div>
+      )}
+
       {loading && (
-        <div className="fixed inset-x-0 top-0 z-30 h-1 bg-emerald-400">
-          <div className="h-full w-full animate-pulse bg-emerald-200" />
+        <div className="fixed inset-x-0 top-0 z-50 h-1 bg-gradient-to-r from-emerald-400 to-purple-400">
+          <div className="h-full w-full animate-pulse bg-gradient-to-r from-emerald-200 to-purple-200" />
         </div>
       )}
     </div>
